@@ -1,11 +1,10 @@
 <?php
-// Make sure APP_ROOT, helpers (current_user, is_admin, etc.) are loaded
 require_once __DIR__ . '/../config.php';
 
-// Use the constant if defined; fallback to your folder name
 $ROOT = defined('APP_ROOT') ? APP_ROOT : '/ProjectWebb';
-
 $u = current_user();
+
+$home = !$u ? app_url('View/auth/login.php') : (is_admin() ? app_url('index.php') : app_url('indexx.php'));
 ?>
 <!DOCTYPE html>
 <html lang="fr">
@@ -19,7 +18,7 @@ $u = current_user();
   <div class="container">
     <nav style="display:flex;justify-content:space-between;align-items:center;gap:10px;">
       <div style="display:flex;gap:10px;align-items:center;">
-        <a href="<?= $ROOT ?>/index.php">Accueil</a>
+        <a href="<?= $home ?>">Accueil</a>
 
         <?php if ($u): ?>
           <?php if (is_admin()): ?>
@@ -42,7 +41,6 @@ $u = current_user();
           <span class="badge"><?= htmlspecialchars($u['nom']) ?> — <?= htmlspecialchars($u['role']) ?></span>
           <a class="btn" href="<?= $ROOT ?>/View/auth/logout.php">Se déconnecter</a>
         <?php else: ?>
-          <a class="btn" href="<?= $ROOT ?>/View/auth/register.php">Créer un compte</a>
           <a class="btn primary" href="<?= $ROOT ?>/View/auth/login.php">Se connecter</a>
         <?php endif; ?>
       </div>

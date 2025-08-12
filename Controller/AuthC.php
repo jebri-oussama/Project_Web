@@ -34,53 +34,24 @@ class AuthC {
             'role'  => $user['role']
         ];
         session_regenerate_id(true);
-        return true;
-    }
 
-    public function register(array $data, array &$errors): bool {
-        csrf_validate();
+        // Role-based landing:
+        $target = ($user['role'] === 'admin') ? app_url('index.php') : app_url('indexx.php');
 
-        $nom = trim($data['nom'] ?? '');
-        $email = strtolower(trim($data['email'] ?? ''));
-        $password = $data['password'] ?? '';
-        $confirm  = $data['confirm'] ?? '';
-
-        if ($nom === '') { $errors['nom'] = "Nom requis."; }
-        elseif (mb_strlen($nom) > 120) { $errors['nom'] = "Nom trop long (max 120)."; }
-
-        if ($email === '') { $errors['email'] = "Email requis."; }
-        elseif (!filter_var($email, FILTER_VALIDATE_EMAIL)) { $errors['email'] = "Email invalide."; }
-        elseif (mb_strlen($email) > 190) { $errors['email'] = "Email trop long (max 190)."; }
-
-        if (mb_strlen($password) < 6) { $errors['password'] = "Mot de passe (≥ 6)."; }
-        if ($confirm !== $password) { $errors['confirm'] = "Les mots de passe ne correspondent pas."; }
-        if ($errors) return false;
-
-        $db = config::getConnexion();
-        $q = $db->prepare("SELECT 1 FROM utilisateur WHERE email=? LIMIT 1");
-        $q->execute([$email]);
-        if ($q->fetchColumn()) {
-            $errors['email'] = "Cet email est déjà utilisé.";
-            return false;
+        // Optional NEXT param if it points inside the app:
+        $next = $_POST['next'] ?? '';
+        if ($next && str_starts_with($next, APP_ROOT)) {
+            $target = $next;
         }
 
-        $ins = $db->prepare("INSERT INTO utilisateur (nom,email,mot_de_passe,role) VALUES (?,?,?,?)");
-        $ok = $ins->execute([$nom, $email, password_hash($password, PASSWORD_BCRYPT), 'salarie']);
-        if (!$ok) { $errors['__global'] = "Impossible de créer le compte."; return false; }
-
-        // Auto login
-        $_SESSION['user'] = [
-            'id'    => (int)$db->lastInsertId(),
-            'nom'   => $nom,
-            'email' => $email,
-            'role'  => 'salarie'
-        ];
-        session_regenerate_id(true);
-        return true;
+        header('Location: ' . $target);
+        exit;
     }
 
     public function logout(): void {
         unset($_SESSION['user']);
         session_regenerate_id(true);
+        header('Location: ' . app_url('View/auth/login.php'));
+        exit;
     }
 }
