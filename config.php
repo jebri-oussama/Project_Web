@@ -39,7 +39,7 @@ function csrf_validate() {
 
 /* ------------ App base ------------ */
 if (!defined('APP_ROOT')) {
-    define('APP_ROOT', '/ProjectWEBb'); // <--- change if folder differs
+    define('APP_ROOT', '/ProjectWebb'); // <--- change if folder differs
 }
 function app_url(string $path): string {
     return rtrim(APP_ROOT, '/') . '/' . ltrim($path, '/');
